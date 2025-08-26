@@ -1,15 +1,14 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Resultados TRI</title>
+  <title>Plataforma de Simulados</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
-<body class="bg-gray-100 min-h-screen flex items-center justify-center p-6">
-  <div class="w-full max-w-4xl bg-white shadow-xl rounded-2xl p-6">
-    <h1 class="text-2xl font-bold text-center text-gray-800 mb-6">📊 Resultados do Teste (TRI)</h1>
+<body class="bg-gray-900 text-gray-100 min-h-screen p-6">
+  <div class="max-w-5xl mx-auto">
+    <h1 class="text-3xl font-bold mb-6 text-center">Plataforma de Simulados</h1>
 
     <!-- Seleção do simulado -->
     <div class="flex gap-2 justify-center mb-6">
@@ -19,37 +18,34 @@
         <option value="simulado2">Simulado 02</option>
         <option value="simulado3">Simulado 03</option>
       </select>
-    </div>
-
-    <!-- Campo para matrícula -->
-    <div class="flex gap-2 justify-center mb-6">
       <input id="matriculaInput" type="text" placeholder="Digite sua matrícula"
-             class="border rounded-lg px-4 py-2 w-2/3 focus:outline-none focus:ring-2 focus:ring-blue-500">
+             class="border rounded-lg px-4 py-2 w-1/3 focus:outline-none focus:ring-2 focus:ring-blue-500">
       <button onclick="buscarAluno()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg">Buscar</button>
     </div>
 
-    <!-- Área dos resultados -->
+    <!-- Resultado -->
     <div id="resultado" class="hidden">
-      <div class="bg-gray-50 p-4 rounded-xl shadow mb-6">
-        <h2 class="text-xl font-semibold mb-2">Resultado Individual</h2>
-        <p id="nome" class="text-gray-700"></p>
-        <div id="areasNotas" class="grid grid-cols-2 gap-4 mt-2"></div>
+      <div class="bg-gray-800 p-4 rounded-xl shadow mb-6">
+        <h2 id="tituloSimulado" class="text-2xl font-semibold mb-4"></h2>
+        <p id="nome" class="text-lg font-semibold mb-2"></p>
+        <div id="areas" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
       </div>
 
-      <div class="bg-gray-50 p-4 rounded-xl shadow">
-        <h2 class="text-xl font-semibold mb-2">Estatísticas por Área</h2>
+      <!-- Gráfico -->
+      <div class="bg-gray-800 p-4 rounded-xl shadow mb-6">
         <canvas id="grafico"></canvas>
       </div>
+
+      <button onclick="voltar()" class="px-4 py-2 bg-blue-600 rounded-lg hover:bg-blue-700">Voltar</button>
     </div>
 
-    <!-- Mensagem de erro -->
-    <p id="erro" class="text-red-600 text-center hidden mt-4">❌ Matrícula não encontrada ou simulado não selecionado</p>
+    <p id="erro" class="text-red-500 text-center hidden mt-4">❌ Matrícula não encontrada ou simulado não selecionado</p>
   </div>
 
   <script>
-    let dadosAlunos = [];
+    let dadosAlunos = {};
     let dadosStats = {};
-    let grafico;
+    let grafico = null;
 
     async function buscarAluno() {
       const simulado = document.getElementById("simuladoSelect").value;
@@ -64,16 +60,12 @@
       }
 
       try {
-        // Carrega JSON de alunos
-        const resAlunos = await fetch(`dados/${simulado}_alunos.json`);
-        dadosAlunos = await resAlunos.json();
+        // Carregar arquivos JSON correspondentes ao simulado
+        dadosAlunos = await fetch(`${simulado}_alunos.json`).then(r => r.json());
+        dadosStats = await fetch(`${simulado}_stats.json`).then(r => r.json());
 
-        // Carrega JSON de estatísticas
-        const resStats = await fetch(`dados/${simulado}_stats.json`);
-        dadosStats = await resStats.json();
-
+        // Encontrar o aluno
         const aluno = dadosAlunos.find(a => a.matricula === matricula);
-
         if (!aluno) {
           resultadoDiv.classList.add("hidden");
           erro.classList.remove("hidden");
@@ -83,48 +75,64 @@
         erro.classList.add("hidden");
         resultadoDiv.classList.remove("hidden");
 
-        // Mostra dados do aluno
-        document.getElementById("nome").textContent = `Nome: ${aluno.nome}`;
+        document.getElementById("tituloSimulado").textContent = `Simulado: ${simulado}`;
+        document.getElementById("nome").textContent = `Aluno: ${aluno.nome}`;
 
-        const areasDiv = document.getElementById("areasNotas");
+        // Mostrar áreas
+        const areasDiv = document.getElementById("areas");
         areasDiv.innerHTML = '';
-        for (const area in aluno.areas) {
-          areasDiv.innerHTML += `
-            <div class='bg-white p-2 rounded-lg shadow'>
-              <p class='font-semibold'>${area}</p>
-              <p>Nota: ${aluno.areas[area]}</p>
-              <p>Média turma: ${dadosStats.areas[area].media}</p>
-              <p>Desvio padrão: ${dadosStats.areas[area].desvio_padrao}</p>
-            </div>
+        const labels = [];
+        const notasAluno = [];
+        const medias = [];
+
+        Object.keys(aluno.areas).forEach(area => {
+          const notaAluno = aluno.areas[area];
+          const media = dadosStats.areas[area].media;
+          const desvio = dadosStats.areas[area].desvio_padrao;
+
+          labels.push(area);
+          notasAluno.push(notaAluno);
+          medias.push(media);
+
+          const card = document.createElement("div");
+          card.className = "bg-gray-700 p-4 rounded-xl";
+          card.innerHTML = `
+            <h3 class="text-lg font-bold">${area}</h3>
+            <p><strong>Nota do aluno:</strong> ${notaAluno}</p>
+            <p><strong>Média da turma:</strong> ${media}</p>
+            <p><strong>Desvio padrão:</strong> ${desvio}</p>
           `;
-        }
+          areasDiv.appendChild(card);
+        });
 
-        // Cria gráfico das áreas
-        const labels = Object.keys(aluno.areas);
-        const notas = labels.map(a => aluno.areas[a]);
-        const medias = labels.map(a => dadosStats.areas[a].media);
-
+        // Criar gráfico
         if (grafico) grafico.destroy();
-
         const ctx = document.getElementById("grafico").getContext("2d");
         grafico = new Chart(ctx, {
-          type: 'bar',
+          type: "bar",
           data: {
             labels: labels,
             datasets: [
               {
-                label: 'Nota do Aluno',
-                data: notas,
-                backgroundColor: 'rgba(37, 99, 235, 0.7)'
+                label: "Nota do Aluno",
+                data: notasAluno,
+                backgroundColor: "rgba(59, 130, 246, 0.7)"
               },
               {
-                label: 'Média da Turma',
+                label: "Média da Turma",
                 data: medias,
-                backgroundColor: 'rgba(16, 185, 129, 0.7)'
+                backgroundColor: "rgba(16, 185, 129, 0.7)"
               }
             ]
           },
-          options: { responsive: true, plugins: { legend: { position: 'top' } }, scales: { y: { beginAtZero: true } } }
+          options: {
+            responsive: true,
+            plugins: { legend: { labels: { color: "white" } } },
+            scales: {
+              x: { ticks: { color: "white" } },
+              y: { ticks: { color: "white" }, beginAtZero: true }
+            }
+          }
         });
 
       } catch (err) {
@@ -132,6 +140,11 @@
         resultadoDiv.classList.add("hidden");
         erro.classList.remove("hidden");
       }
+    }
+
+    function voltar() {
+      document.getElementById("resultado").classList.add("hidden");
+      document.getElementById("erro").classList.add("hidden");
     }
   </script>
 </body>
