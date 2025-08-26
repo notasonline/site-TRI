@@ -60,9 +60,9 @@
       }
 
       try {
-        // Carregar arquivos JSON correspondentes ao simulado
-        dadosAlunos = await fetch(`${simulado}_alunos.json`).then(r => r.json());
-        dadosStats = await fetch(`${simulado}_stats.json`).then(r => r.json());
+        // Carregar arquivos JSON da pasta 'dados'
+        dadosAlunos = await fetch(`dados/${simulado}_alunos.json`).then(r => r.json());
+        dadosStats = await fetch(`dados/${simulado}_stats.json`).then(r => r.json());
 
         // Encontrar o aluno
         const aluno = dadosAlunos.find(a => a.matricula === matricula);
