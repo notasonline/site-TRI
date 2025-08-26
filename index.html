@@ -53,8 +53,10 @@
         // Carregar JSON do simulado
         dadosAlunos = await fetch(`dados/${simulado}_alunos.json`).then(r => r.json());
 
-        // Encontrar o aluno (converter matrícula para número)
-        const aluno = dadosAlunos.find(a => a.matricula == matricula);
+        // Converter matrícula para número antes de comparar
+        const matriculaNum = Number(matricula);
+        const aluno = dadosAlunos.find(a => a.matricula === matriculaNum);
+
         if (!aluno) {
           resultadoDiv.classList.add("hidden");
           erro.classList.remove("hidden");
