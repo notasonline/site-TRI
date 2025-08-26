@@ -64,8 +64,8 @@
         dadosAlunos = await fetch(`dados/${simulado}_alunos.json`).then(r => r.json());
         dadosStats = await fetch(`dados/${simulado}_stats.json`).then(r => r.json());
 
-        // Encontrar o aluno
-        const aluno = dadosAlunos.find(a => a.matricula === matricula);
+        // Encontrar o aluno (converter matrícula para número)
+        const aluno = dadosAlunos.find(a => a.matricula == matricula);
         if (!aluno) {
           resultadoDiv.classList.add("hidden");
           erro.classList.remove("hidden");
@@ -76,21 +76,20 @@
         resultadoDiv.classList.remove("hidden");
 
         document.getElementById("tituloSimulado").textContent = `Simulado: ${simulado}`;
-        document.getElementById("nome").textContent = `Aluno: ${aluno.nome}`;
+        document.getElementById("nome").textContent = `Aluno: ${aluno.aluno}`;
 
         // Mostrar áreas
         const areasDiv = document.getElementById("areas");
         areasDiv.innerHTML = '';
-        const labels = [];
+        const labels = ["LC", "CH", "CN", "MT"];
         const notasAluno = [];
         const medias = [];
 
-        Object.keys(aluno.areas).forEach(area => {
-          const notaAluno = aluno.areas[area];
+        labels.forEach(area => {
+          const notaAluno = aluno[area];
           const media = dadosStats.areas[area].media;
           const desvio = dadosStats.areas[area].desvio_padrao;
 
-          labels.push(area);
           notasAluno.push(notaAluno);
           medias.push(media);
 
