@@ -4,7 +4,6 @@
   <meta charset="UTF-8">
   <title>Plataforma de Simulados</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body class="bg-gray-900 text-gray-100 min-h-screen p-6">
   <div class="max-w-5xl mx-auto">
@@ -16,7 +15,6 @@
         <option value="">Selecione o Simulado</option>
         <option value="simulado1">Simulado 01</option>
         <option value="simulado2">Simulado 02</option>
-        <option value="simulado3">Simulado 03</option>
       </select>
       <input id="matriculaInput" type="text" placeholder="Digite sua matrícula"
              class="border rounded-lg px-4 py-2 w-1/3 focus:outline-none focus:ring-2 focus:ring-blue-500">
@@ -30,12 +28,6 @@
         <p id="nome" class="text-lg font-semibold mb-2"></p>
         <div id="areas" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
       </div>
-
-      <!-- Gráfico -->
-      <div class="bg-gray-800 p-4 rounded-xl shadow mb-6">
-        <canvas id="grafico"></canvas>
-      </div>
-
       <button onclick="voltar()" class="px-4 py-2 bg-blue-600 rounded-lg hover:bg-blue-700">Voltar</button>
     </div>
 
@@ -44,8 +36,6 @@
 
   <script>
     let dadosAlunos = {};
-    let dadosStats = {};
-    let grafico = null;
 
     async function buscarAluno() {
       const simulado = document.getElementById("simuladoSelect").value;
@@ -60,9 +50,8 @@
       }
 
       try {
-        // Carregar arquivos JSON da pasta 'dados'
+        // Carregar JSON do simulado
         dadosAlunos = await fetch(`dados/${simulado}_alunos.json`).then(r => r.json());
-        dadosStats = await fetch(`dados/${simulado}_stats.json`).then(r => r.json());
 
         // Encontrar o aluno (converter matrícula para número)
         const aluno = dadosAlunos.find(a => a.matricula == matricula);
@@ -82,56 +71,17 @@
         const areasDiv = document.getElementById("areas");
         areasDiv.innerHTML = '';
         const labels = ["LC", "CH", "CN", "MT"];
-        const notasAluno = [];
-        const medias = [];
 
         labels.forEach(area => {
           const notaAluno = aluno[area];
-          const media = dadosStats.areas[area].media;
-          const desvio = dadosStats.areas[area].desvio_padrao;
-
-          notasAluno.push(notaAluno);
-          medias.push(media);
 
           const card = document.createElement("div");
           card.className = "bg-gray-700 p-4 rounded-xl";
           card.innerHTML = `
             <h3 class="text-lg font-bold">${area}</h3>
             <p><strong>Nota do aluno:</strong> ${notaAluno}</p>
-            <p><strong>Média da turma:</strong> ${media}</p>
-            <p><strong>Desvio padrão:</strong> ${desvio}</p>
           `;
           areasDiv.appendChild(card);
-        });
-
-        // Criar gráfico
-        if (grafico) grafico.destroy();
-        const ctx = document.getElementById("grafico").getContext("2d");
-        grafico = new Chart(ctx, {
-          type: "bar",
-          data: {
-            labels: labels,
-            datasets: [
-              {
-                label: "Nota do Aluno",
-                data: notasAluno,
-                backgroundColor: "rgba(59, 130, 246, 0.7)"
-              },
-              {
-                label: "Média da Turma",
-                data: medias,
-                backgroundColor: "rgba(16, 185, 129, 0.7)"
-              }
-            ]
-          },
-          options: {
-            responsive: true,
-            plugins: { legend: { labels: { color: "white" } } },
-            scales: {
-              x: { ticks: { color: "white" } },
-              y: { ticks: { color: "white" }, beginAtZero: true }
-            }
-          }
         });
 
       } catch (err) {
