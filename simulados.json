@@ -1,7 +1,7 @@
 [
     {
         "id": "sim01",
-        "nome": "Simulado testing",
+        "nome": "Simulado",
         "arquivo": "data/simulado_01.json"
     },
     {
