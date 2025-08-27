@@ -1,185 +1,33 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-br">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Plataforma de Simulados</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Consulta de Notas</title>
+    <link rel="stylesheet" href="style.css">
 </head>
-<body class="bg-gradient-to-br from-gray-800 to-gray-900 text-gray-100 min-h-screen p-4 md:p-6">
-  <div class="max-w-5xl mx-auto">
-    <header class="text-center mb-8">
-      <h1 class="text-4xl font-bold mb-2 bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-500">Plataforma de Simulados</h1>
-      <p class="text-gray-400">Consulte seu desempenho nos simulados</p>
-    </header>
+<body>
 
-    <!-- Seleção do simulado -->
-    <div class="bg-gray-800 rounded-xl p-6 shadow-lg mb-8">
-      <div class="flex flex-col md:flex-row gap-4 items-center">
-        <div class="w-full md:w-2/5">
-          <label class="block text-sm font-medium text-gray-300 mb-1">Selecione o Simulado</label>
-          <select id="simuladoSelect" class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500">
-            <option value="">Selecione o Simulado</option>
-            <option value="simulado1">Simulado 01</option>
-            <option value="simulado2">Simulado 02</option>
-          </select>
+    <div class="container">
+        <h1>Portal do Aluno</h1>
+        <p>Consulte aqui o resultado dos seus simulados.</p>
+
+        <div class="form-consulta">
+            <label for="matricula">Sua Matrícula:</label>
+            <input type="text" id="matricula" placeholder="Digite sua matrícula">
+
+            <label for="simulado">Selecione o Simulado:</label>
+            <select id="simulado">
+                <option value="">Carregando simulados...</option>
+            </select>
+
+            <button id="btnConsultar">Consultar</button>
         </div>
-        
-        <div class="w-full md:w-2/5">
-          <label class="block text-sm font-medium text-gray-300 mb-1">Digite sua matrícula</label>
-          <input id="matriculaInput" type="text" placeholder="Ex: 1000, 1001..."
-                 class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500">
-        </div>
-        
-        <div class="w-full md:w-1/5 mt-4 md:mt-6">
-          <button onclick="buscarAluno()" class="w-full bg-blue-600 hover:bg-blue-700 text-white px-4 py-3 rounded-lg flex items-center justify-center transition duration-200">
-            <i class="fas fa-search mr-2"></i> Buscar
-          </button>
-        </div>
-      </div>
-    </div>
 
-    <!-- Loading -->
-    <div id="loading" class="hidden justify-center my-8">
-      <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
-    </div>
-
-    <!-- Resultado -->
-    <div id="resultado" class="hidden">
-      <div class="bg-gray-800 p-6 rounded-xl shadow-lg mb-6">
-        <div class="flex justify-between items-start mb-6">
-          <div>
-            <h2 id="tituloSimulado" class="text-2xl font-semibold mb-1"></h2>
-            <p id="nome" class="text-lg font-medium text-blue-300"></p>
-          </div>
-          <span id="mediaGeral" class="bg-gradient-to-r from-blue-500 to-purple-600 text-white px-4 py-2 rounded-full text-sm font-bold"></span>
-        </div>
-        
-        <div id="areas" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
-      </div>
-      
-      <div class="text-center">
-        <button onclick="voltar()" class="px-5 py-2.5 bg-gray-700 hover:bg-gray-600 rounded-lg transition duration-200 flex items-center justify-center mx-auto">
-          <i class="fas fa-arrow-left mr-2"></i> Voltar
-        </button>
-      </div>
-    </div>
-
-    <div id="erro" class="hidden mt-6 p-4 bg-red-900/30 border border-red-700 rounded-lg text-center">
-      <i class="fas fa-exclamation-circle text-red-400 mr-2"></i>
-      <span class="text-red-300">Matrícula não encontrada ou simulado não selecionado</span>
-    </div>
-  </div>
-
-  <script>
-    let dadosAlunos = {};
-
-    async function buscarAluno() {
-      const simulado = document.getElementById("simuladoSelect").value;
-      const matricula = document.getElementById("matriculaInput").value.trim();
-      const resultadoDiv = document.getElementById("resultado");
-      const erro = document.getElementById("erro");
-      const loading = document.getElementById("loading");
-
-      // Esconder resultados anteriores
-      resultadoDiv.classList.add("hidden");
-      erro.classList.add("hidden");
-      
-      if (!simulado || matricula === "") {
-        erro.classList.remove("hidden");
-        return;
-      }
-
-      // Mostrar loading
-      loading.classList.remove("hidden");
-
-      try {
-        // Carregar JSON do simulado
-        const response = await fetch(`dados/${simulado}_alunos.json`);
-        
-        if (!response.ok) {
-          throw new Error('Arquivo não encontrado');
-        }
-        
-        dadosAlunos = await response.json();
-
-        // Não converter para número - tratar como string para comparação
-        const aluno = dadosAlunos.find(a => a.matricula.toString() === matricula);
-
-        if (!aluno) {
-          resultadoDiv.classList.add("hidden");
-          erro.classList.remove("hidden");
-          loading.classList.add("hidden");
-          return;
-        }
-
-        loading.classList.add("hidden");
-        erro.classList.add("hidden");
-        resultadoDiv.classList.remove("hidden");
-
-        document.getElementById("tituloSimulado").textContent = `Simulado: ${simulado.toUpperCase()}`;
-        document.getElementById("nome").textContent = `${aluno.aluno}`;
-
-        // Calcular média geral
-        const notas = [aluno.LC, aluno.CH, aluno.CN, aluno.MT];
-        const mediaGeral = notas.reduce((sum, nota) => sum + nota, 0) / notas.length;
-        document.getElementById("mediaGeral").textContent = `Média: ${mediaGeral.toFixed(1)}`;
-
-        // Mostrar áreas
-        const areasDiv = document.getElementById("areas");
-        areasDiv.innerHTML = '';
-        const areas = [
-          { id: "LC", nome: "Linguagens e Códigos", cor: "from-blue-500 to-blue-700" },
-          { id: "CH", nome: "Ciências Humanas", cor: "from-green-500 to-green-700" },
-          { id: "CN", nome: "Ciências da Natureza", cor: "from-purple-500 to-purple-700" },
-          { id: "MT", nome: "Matemática", cor: "from-red-500 to-red-700" }
-        ];
-
-        areas.forEach(area => {
-          const notaAluno = aluno[area.id];
-          const porcentagem = (notaAluno / 1000) * 100;
-
-          const card = document.createElement("div");
-          card.className = "bg-gray-750 p-5 rounded-xl border border-gray-700";
-          card.innerHTML = `
-            <div class="flex justify-between items-start mb-4">
-              <h3 class="text-lg font-bold">${area.nome} <span class="font-mono">(${area.id})</span></h3>
-              <span class="text-2xl font-bold">${notaAluno.toFixed(1)}</span>
+        <div id="resultado">
             </div>
-            <div class="w-full bg-gray-700 rounded-full h-2.5 mb-2">
-              <div class="bg-gradient-to-r ${area.cor} h-2.5 rounded-full" style="width: ${porcentagem}%"></div>
-            </div>
-            <div class="flex justify-between text-sm text-gray-400">
-              <span>0</span>
-              <span>1000</span>
-            </div>
-          `;
-          areasDiv.appendChild(card);
-        });
+    </div>
 
-      } catch (err) {
-        console.error(err);
-        resultadoDiv.classList.add("hidden");
-        loading.classList.add("hidden");
-        erro.textContent = "❌ Erro ao carregar os dados do simulado";
-        erro.classList.remove("hidden");
-      }
-    }
-
-    function voltar() {
-      document.getElementById("resultado").classList.add("hidden");
-      document.getElementById("erro").classList.add("hidden");
-      document.getElementById("matriculaInput").value = "";
-      document.getElementById("simuladoSelect").value = "";
-    }
-
-    // Permitir busca com Enter
-    document.getElementById("matriculaInput").addEventListener("keypress", function(event) {
-      if (event.key === "Enter") {
-        buscarAluno();
-      }
-    });
-  </script>
+    <script src="script.js"></script>
 </body>
 </html>
