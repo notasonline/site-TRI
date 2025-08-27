@@ -1,1 +1,12 @@
-
+[
+    {
+        "id": "sim01",
+        "nome": "Simulado Teste",
+        "arquivo": "data/simulado_01.json"
+    },
+    {
+        "id": "sim02",
+        "nome": "Simulado Geral - 2º Bimestre",
+        "arquivo": "data/simulado_02.json"
+    }
+]
