@@ -7,8 +7,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const cacheBuster = `?v=${new Date().getTime()}`;
 
-    // Carregar lista de simulados
-    fetch(`simulados.json${cacheBuster}`)
+    // Carregar lista de simulados da pasta data/
+    fetch(`data/simulados.json${cacheBuster}`)
         .then(response => {
             if (!response.ok) throw new Error('Erro ao carregar lista de simulados');
             return response.json();
@@ -17,7 +17,7 @@ document.addEventListener('DOMContentLoaded', () => {
             seletorSimulado.innerHTML = '<option value="">-- Escolha um simulado --</option>';
             data.forEach(simulado => {
                 const option = document.createElement('option');
-                option.value = simulado.arquivo;
+                option.value = `data/${simulado.arquivo}`; // Adiciona o prefixo data/
                 option.textContent = simulado.nome;
                 seletorSimulado.appendChild(option);
             });
@@ -44,6 +44,7 @@ document.addEventListener('DOMContentLoaded', () => {
         btnConsultar.disabled = true;
         spanBtn.textContent = 'Buscando...';
 
+        // Busca o arquivo do simulado (já com o caminho data/)
         fetch(`${arquivoSimulado}${cacheBuster}`)
             .then(response => {
                 if (!response.ok) throw new Error('Arquivo de notas não encontrado');
@@ -77,4 +78,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 spanBtn.textContent = 'Consultar';
             });
     });
+
+    // Habilitar o botão quando ambos os campos estiverem preenchidos
+    inputMatricula.addEventListener('input', verificarCampos);
+    seletorSimulado.addEventListener('change', verificarCampos);
+
+    function verificarCampos() {
+        btnConsultar.disabled = !(inputMatricula.value.trim() && seletorSimulado.value);
+    }
 });
