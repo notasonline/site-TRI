@@ -1,55 +1,62 @@
-// Aguarda o carregamento completo do HTML
 document.addEventListener('DOMContentLoaded', () => {
 
     const seletorSimulado = document.getElementById('simulado');
     const inputMatricula = document.getElementById('matricula');
-    // CORREÇÃO: O ID foi alterado de 'btn-consultar' para 'btnConsultar' para corresponder ao HTML.
     const btnConsultar = document.getElementById('btnConsultar');
+    const spanBtn = btnConsultar.querySelector('span'); // Pega o span dentro do botão
     const divResultado = document.getElementById('resultado');
 
-    let simuladosDisponiveis = []; // Para guardar os dados do simulados.json
+    // MELHORIA (Anti-Cache): Adiciona um parâmetro aleatório à URL para evitar cache.
+    const cacheBuster = `?v=${new Date().getTime()}`;
 
-    // 1. Carregar la lista de simulados do arquivo mestre
-    fetch('simulados.json')
-        .then(response => response.json())
+    // 1. Carregar a lista de simulados do arquivo mestre
+    fetch(`simulados.json${cacheBuster}`)
+        .then(response => {
+            if (!response.ok) throw new Error('Falha ao carregar lista de simulados.');
+            return response.json();
+        })
         .then(data => {
-            simuladosDisponiveis = data; // Salva os dados para uso posterior
-            
-            seletorSimulado.innerHTML = '<option value="">-- Escolha um simulado --</option>'; // Limpa a opção de "carregando"
-            
+            seletorSimulado.innerHTML = '<option value="">-- Escolha um simulado --</option>';
             data.forEach(simulado => {
                 const option = document.createElement('option');
-                option.value = simulado.arquivo; // O valor será o caminho para o arquivo de notas
-                option.textContent = simulado.nome; // O texto que o usuário vê
+                option.value = simulado.arquivo;
+                option.textContent = simulado.nome;
                 seletorSimulado.appendChild(option);
             });
+            seletorSimulado.disabled = false; // Habilita o seletor após o carregamento
         })
         .catch(error => {
-            console.error('Erro ao carregar a lista de simulados:', error);
+            console.error(error);
             seletorSimulado.innerHTML = '<option value="">Erro ao carregar</option>';
+            divResultado.innerHTML = `<p style="color: red;">${error.message}</p>`;
         });
-        
+
     // 2. Adicionar o evento de clique ao botão
     btnConsultar.addEventListener('click', () => {
         const matricula = inputMatricula.value.trim();
         const arquivoSimulado = seletorSimulado.value;
 
-        // Validações simples
+        // MELHORIA: Limpa o resultado anterior antes de uma nova busca
+        divResultado.innerHTML = '';
+
         if (!matricula || !arquivoSimulado) {
             divResultado.innerHTML = `<p style="color: red;">Por favor, preencha a matrícula e selecione um simulado.</p>`;
             return;
         }
 
-        divResultado.innerHTML = `<p>Buscando...</p>`;
+        // MELHORIA: Desabilita o botão e mostra feedback visual
+        btnConsultar.disabled = true;
+        spanBtn.textContent = 'Buscando...';
 
-        // 3. Carregar o arquivo de notas do simulado selecionado
-        fetch(arquivoSimulado)
-            .then(response => response.json())
+        fetch(`${arquivoSimulado}${cacheBuster}`)
+            .then(response => {
+                if (!response.ok) throw new Error('Não foi possível encontrar o arquivo de notas para este simulado.');
+                return response.json();
+            })
             .then(notas => {
-                // 4. Procurar o aluno pela matrícula
-                const alunoEncontrado = notas.find(aluno => aluno.matricula === matricula);
+                // CORREÇÃO (Busca): Converte ambos os valores para String para garantir uma comparação correta.
+                const alunoEncontrado = notas.find(aluno => String(aluno.matricula) === matricula);
 
-                // 5. Exibir o resultado
                 if (alunoEncontrado) {
                     divResultado.innerHTML = `
                         <div class="resultado-header">Resultado para ${alunoEncontrado.aluno}</div>
@@ -66,7 +73,12 @@ document.addEventListener('DOMContentLoaded', () => {
             })
             .catch(error => {
                 console.error('Erro ao buscar as notas:', error);
-                divResultado.innerHTML = `<p style="color: red;">Ocorreu um erro ao consultar as notas. Tente novamente.</p>`;
+                divResultado.innerHTML = `<p style="color: red;">${error.message}</p>`;
+            })
+            .finally(() => {
+                // MELHORIA: Habilita o botão novamente, independentemente do resultado
+                btnConsultar.disabled = false;
+                spanBtn.textContent = 'Consultar';
             });
     });
 });
