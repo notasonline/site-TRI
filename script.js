@@ -3,12 +3,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const seletorSimulado = document.getElementById('simulado');
     const inputMatricula = document.getElementById('matricula');
+    // CORREÇÃO: O ID foi alterado de 'btn-consultar' para 'btnConsultar' para corresponder ao HTML.
     const btnConsultar = document.getElementById('btnConsultar');
     const divResultado = document.getElementById('resultado');
 
     let simuladosDisponiveis = []; // Para guardar os dados do simulados.json
 
-    // 1. Carregar a lista de simulados do arquivo mestre
+    // 1. Carregar la lista de simulados do arquivo mestre
     fetch('simulados.json')
         .then(response => response.json())
         .then(data => {
