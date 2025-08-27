@@ -1,12 +1,12 @@
 [
     {
         "id": "sim01",
-        "nome": "Simulado testing",
-        "arquivo": "data/simulado_01.json"
+        "nome": "Simulado Testing",
+        "arquivo": "simulado_01.json"
     },
     {
         "id": "sim02",
         "nome": "Simulado 02",
-        "arquivo": "data/simulado_02.json"
+        "arquivo": "simulado_02.json"
     }
 ]
