@@ -5,23 +5,37 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Consulta de Notas</title>
     <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
     <div class="container">
-        <h1>Portal do Aluno</h1>
-        <p>Consulte aqui o resultado dos seus simulados.</p>
+        <div class="header">
+            <div class="logo">
+                <i class="fas fa-graduation-cap"></i>
+                <h1>Portal do Aluno</h1>
+            </div>
+            <p>Consulte aqui o resultado dos seus simulados.</p>
+        </div>
 
         <div class="form-consulta">
-            <label for="matricula">Sua Matrícula:</label>
-            <input type="text" id="matricula" placeholder="Digite sua matrícula">
+            <div class="input-group">
+                <label for="matricula"><i class="fas fa-id-card"></i> Sua Matrícula:</label>
+                <input type="text" id="matricula" placeholder="Digite sua matrícula">
+            </div>
 
-            <label for="simulado">Selecione o Simulado:</label>
-            <select id="simulado" disabled>
-                <option value="">Carregando simulados...</option>
-            </select>
+            <div class="input-group">
+                <label for="simulado"><i class="fas fa-book"></i> Selecione o Simulado:</label>
+                <select id="simulado" disabled>
+                    <option value="">Carregando simulados...</option>
+                </select>
+            </div>
 
-            <button id="btnConsultar" disabled>
-                <span>Consultar</span>
+            <button id="btnConsultar">
+                <span class="btn-text">Consultar</span>
+                <span class="btn-loading" style="display: none;">
+                    <i class="fas fa-spinner fa-spin"></i> Buscando...
+                </span>
             </button>
         </div>
 
